@@ -29,8 +29,8 @@ def calculo_comisiones(moneda,algoritmo,monto_nominal):
 
 def leer_archivo(nombre):
     archivo = open(nombre)
-    texto = archivo.readlines()
-    return texto,archivo
+    time_stamp = archivo.readline()
+    return archivo
 
 
 def capturar_datos(linea):
@@ -69,9 +69,8 @@ def validar_cod_identificacion(destinatario):
 
 def main():
     nombre = "ordenes25.txt"
-    texto,archivo_leido = leer_archivo(nombre)
+    archivo_leido = leer_archivo(nombre)
 
-    archivo_leido.close()
 
     #Contadores
     saltos = 0
@@ -80,24 +79,23 @@ def main():
 
     #Banderas
 
-    for linea in texto:
-        if saltos >= 1:
-            
-            destinatario,cod_identificacion,ord_pago,monto_nominal,cod_comision,cod_cal_impositivo = capturar_datos(linea)
-            mostrar_pagos(destinatario,cod_identificacion,ord_pago,monto,cod_comision,cod_cal_impositivo)
+    for linea in archivo_leido:
+        destinatario, cod_identificacion, ord_pago, monto_nominal, cod_comision, cod_cal_impositivo = capturar_datos(
+            linea)
+        mostrar_pagos(destinatario, cod_identificacion, ord_pago, monto, cod_comision, cod_cal_impositivo)
 
-            #Validar Destinatorio
-            if validar_cod_identificacion(cod_identificacion):
-                print("Cod Identificacion valido.")
-            else:
-                print("Cod Identificacion invalido.")
+        # Validar Destinatorio
+        if validar_cod_identificacion(cod_identificacion):
+            print("Cod Identificacion valido.")
+        else:
+            print("Cod Identificacion invalido.")
 
-            moneda,moneda_incorrecta=extraer_moneda(ord_pago)
+        moneda, moneda_incorrecta = extraer_moneda(ord_pago)
 
-            #calculo_comisiones(moneda,cod_comision, monto_nominal)
-            print(moneda,"..",moneda_incorrecta)
-            
-        saltos += 1
+        # calculo_comisiones(moneda,cod_comision, monto_nominal)
+        print(moneda, "..", moneda_incorrecta)
+
+    archivo_leido.close()
 
 if __name__ == "__main__":
     main()
