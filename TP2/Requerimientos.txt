@@ -1,0 +1,79 @@
+
+DATOS
+Linea = 54
+SEPARADOR  = "\n"
+DESTINATARIO = LINEA[0:20] , RELLENADO A LA DERECHA CON " "
+COD_IDENTIFICACION = LINEA[20:30] , RELLENADO A LA DERECHA CON " "
+ORD_PAGO = LINEA[30: 40], #MONEDA
+MONTO = LINEA[40:50], ES INT
+COD_COMISION  = LINEA[50:52], 1 NUMERO 2 BLANCO EJ "1 ", INFLUYE EN CALCULO DE COMISION, PAGINA 3 Y 4
+COD_CALC_IMPOSITIVO =LINEA[52:54],  1 NUMERO 2 BLANCO EJ "1 ", INFLUYE EN CALCULO DE VAL IMPOS, PAGINA 4
+
+
+VALIDACIONES
+1) Orden DE PAGO Validacion:
+-QUE NO TENGA MONEDA INVALIDA
+-QUE TENGA MONEDA VALIDA Y DENTRO DE LAS 5  VER TP
+-QUE TENGA 2  O + 2 MONEDAS DISTINTAS INVILIDA Y ESTE DENTRO DE LAS 5 VER TP
+-QUE TENGA 2  O + 2 MONEDAS IGUALES VALIDA Y ESTE DENTRO DE LAS 5 VER TP
+-Si cumple validacion mensaje-> “Moneda incorrecta”
+
+2)Destinario Validacion:
+-Solo Mayus
+-Solo Numeros
+-Combinacion Mayus,Numeros y "-_"
+-No solo "-_" o cualquier otro caracter es Invalido -> mensaje: “Destinatario mal identificado”
+
+REQUERIMIENTOS
+Linea te timestamp(1ra linea)->Saltear
+
+1-R1 y R2
+R1: operaciones invalidas por moneda no autorizada ORD_PAGO
+R2: operacions invalidas por DESTINATARIO mal identificado DESTINATARIO
+MONEDA_NO_AUTORIZADA: R1 Y R2 VERDADERO
+2-R3 y R4
+R3: cant de operaciones validas
+R4: suma redondeada de todos los montos finales de OPERACIONES VALIDAS
+
+3-R5,R6,R7,R8,R9
+Cantidad de operaciones validas para cada moneda, Si la orde tiene moneda validad, debe contarse
+sin importar si el beneficiario era incorrecto
+
+4-R10 ,R11 Y R12
+-Tener en cuenta ordenes validas e invalidas
+-Orden con mayor diferencia entre R11 Y R12
+R10: codigo de orden de pago,en caso de ser varias, informar 1RA
+R11: monto nominal
+R12: monto final
+
+5-R13,R14
+R13: nombre de beneficiario de la primera operacion del archivo
+R14: candad de operaciones que tuve ese beneficiario en el archivo
+
+6-R15
+R15: porcentaje de operaciones invalidas(cualquier motivo) , la operacion hacerla con //
+
+7-R16
+R16: monto final promedio para todas ordene validas emitidas con moneda ARS, para la operacion
+usar //
+
+
+Consideraciones
+Fichas: 1 a 13
+Usar funciones
+print(' (r1) - Cantidad de ordenes invalidas - moneda no autorizada:', cant_minvalida)
+print(' (r2) - Cantidad de ordenes invalidas - beneficiario mal identificado:', cant_binvalido)
+print(' (r3) - Cantidad de operaciones validas:', cant_oper_validas)
+print(' (r4) - Suma de montos finales de operaciones validas:', suma_mf_validas)
+print(' (r5) - Cantidad de ordenes para moneda ARS:', cant_ARS)
+print(' (r6) - Cantidad de ordenes para moneda USD:', cant_USD)
+print(' (r7) - Cantidad de ordenes para moneda EUR:', cant_EUR)
+print(' (r8) - Cantidad de ordenes para moneda GBP:', cant_GBP)
+print(' (r9) - Cantidad de ordenes para moneda JPN:', cant_JPY)
+print('(r10) - Codigo de la orden de pago con mayor diferencia  nominal - final:', cod_my)
+print('(r11) - Monto nominal de esa misma orden:', mont_nom_my)
+print('(r12) - Monto final de esa misma orden:', mont_fin_my)
+print('(r13) - Nombre del primer beneficiario del archivo:', nom_primer_benef)
+print('(r14) - Cantidad de veces que apareció ese mismo nombre:', cant_nom_primer_benef)
+print('(r15) - Porcentaje de operaciones inválidas sobre el total:', porcentaje)
+print('(r16) - Monto final promedio de las ordenes validas en moneda ARS:', promedio)
