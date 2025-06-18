@@ -1,3 +1,32 @@
+def extraer_moneda(cod_pago):
+    monedas_validas=["USD", "EUR", "ARS", "GBP", "JPY"]
+    monedas_encontradas=[]
+    flag_moneda=False
+    cont=0
+    moneda_incorrecta=False
+    moneda=''
+    for mon in monedas_validas:
+
+        if mon in cod_pago:
+            flag_moneda=True
+            moneda_incorrecta=False
+            monedas_encontradas.append(mon)
+            if len(monedas_encontradas)>1:
+                moneda_incorrecta = True
+            else:
+                moneda = mon
+        elif not flag_moneda:
+            moneda_incorrecta = True
+
+    return moneda,moneda_incorrecta
+
+
+
+def calculo_comisiones(moneda,algoritmo,monto_nominal):
+    destinatario, cod_identificacion, ord_pago, monto, cod_comision, cod_cal_impositivo=capturar_datos();
+
+
+
 def leer_archivo(nombre):
     archivo = open(nombre)
     texto = archivo.readlines()
@@ -14,7 +43,6 @@ def capturar_datos(linea):
     cod_cal_impositivo = linea[52:54]
     return destinatario,cod_identificacion,ord_pago,monto,cod_comision,cod_cal_impositivo
 
-
 def mostrar_pagos(destinatario,cod_identificacion,ord_pago,monto,cod_comision,cod_cal_impositivo):
     print(
         "*" * 15, "NUEVO PAGO", "*" * 15, "\n",
@@ -25,12 +53,6 @@ def mostrar_pagos(destinatario,cod_identificacion,ord_pago,monto,cod_comision,co
         "5 COD_COMISION  =", cod_comision, "\n",
         "6 COD_CALC_IMPOSITIVO = " + cod_cal_impositivo + "."
     )
-
-
-def validar_moneda(cod_identificacion):
-    mensaje = ''
-    pass
-
 
 def validar_cod_identificacion(destinatario):
     estado = False
@@ -44,8 +66,6 @@ def validar_cod_identificacion(destinatario):
             break
 
     return estado
-
-
 
 def main():
     nombre = "ordenes25.txt"
@@ -63,17 +83,19 @@ def main():
     for linea in texto:
         if saltos >= 1:
             
-            destinatario,cod_identificacion,ord_pago,monto,cod_comision,cod_cal_impositivo = capturar_datos(linea)
+            destinatario,cod_identificacion,ord_pago,monto_nominal,cod_comision,cod_cal_impositivo = capturar_datos(linea)
             mostrar_pagos(destinatario,cod_identificacion,ord_pago,monto,cod_comision,cod_cal_impositivo)
 
-            #Validar Monedas
-            moneda = validar_moneda(cod_identificacion)
             #Validar Destinatorio
             if validar_cod_identificacion(cod_identificacion):
                 print("Cod Identificacion valido.")
             else:
                 print("Cod Identificacion invalido.")
-        
+
+            moneda,moneda_incorrecta=extraer_moneda(ord_pago)
+
+            #calculo_comisiones(moneda,cod_comision, monto_nominal)
+            print(moneda,"..",moneda_incorrecta)
             
         saltos += 1
 
