@@ -24,6 +24,16 @@ def extraer_moneda(cod_pago):
 
 def calculo_comisiones(moneda,algoritmo,monto_nominal):
     destinatario, cod_identificacion, ord_pago, monto, cod_comision, cod_cal_impositivo=capturar_datos();
+    comision=0
+    if algoritmo==1 and moneda=="ARS":
+        comision=monto_nominal*0.09
+        monto_base=monto_nominal-comision
+    elif algoritmo==2 and moneda=="USD":
+        if monto_nominal<50000:
+            comision=0
+        elif
+        comision=monto_nominal*0.09
+        monto_base=monto_nominal-comision
 
 
 
