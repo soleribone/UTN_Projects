@@ -66,7 +66,7 @@ def validar_cod_identificacion(destinatario):
 
     return estado
 
-def mostrar_resultados(cant_GBP,cant_JPY):
+def mostrar_resultados(cant_GBP,cant_JPY,cod_my,mont_nom_my,mont_fin_my):
 #     print(' (r1) - Cantidad de ordenes invalidas - moneda no autorizada:', cant_minvalida)
 #     print(' (r2) - Cantidad de ordenes invalidas - beneficiario mal identificado:', cant_binvalido)
 #     print(' (r3) - Cantidad de operaciones validas:', cant_oper_validas)
@@ -76,9 +76,9 @@ def mostrar_resultados(cant_GBP,cant_JPY):
 #     print(' (r7) - Cantidad de ordenes para moneda EUR:', cant_EUR)
     print(' (r8) - Cantidad de ordenes para moneda GBP:', cant_GBP)
     print(' (r9) - Cantidad de ordenes para moneda JPN:', cant_JPY)
-#     print('(r10) - Codigo de la orden de pago con mayor diferencia  nominal - final:', cod_my)
-#     print('(r11) - Monto nominal de esa misma orden:', mont_nom_my)
-#     print('(r12) - Monto final de esa misma orden:', mont_fin_my)
+    print('(r10) - Codigo de la orden de pago con mayor diferencia  nominal - final:', cod_my)
+    print('(r11) - Monto nominal de esa misma orden:', mont_nom_my)
+    print('(r12) - Monto final de esa misma orden:', mont_fin_my)
 #     print('(r13) - Nombre del primer beneficiario del archivo:', nom_primer_benef)
 #     print('(r14) - Cantidad de veces que apareció ese mismo nombre:', cant_nom_primer_benef)
 #     print('(r15) - Porcentaje de operaciones inválidas sobre el total:', porcentaje)
@@ -90,14 +90,28 @@ def contar_monedas(moneda, c_monedas, param):
         c_monedas += 1
     return c_monedas
 
+
+def calc_cod_may(monto_nominal, monto_final, ord_pago,cod_mayor,dif_anterior):
+    diferencia = monto_nominal - monto_final
+    if cod_mayor is None:
+        cod_mayor = ord_pago
+        dif_anterior = diferencia
+    elif dif_anterior < diferencia:
+        cod_mayor = ord_pago
+        dif_anterior = diferencia
+    return cod_mayor,dif_anterior
+
+
+
 def main():
     nombre = "ordenes25.txt"
     archivo_leido = leer_archivo(nombre)
     #Contadores
-    cant_JPY = cant_GBP = 0
+    cant_GBP= cant_JPY= cod_my= mont_nom_my = mont_fin_my =dif_hist = cant_JPY = cant_GBP = 0
     #Variables
     destinatario= cod_identificacion= ord_pago= monto= cod_comision= cod_cal_impositivo = ""
-
+    cod_mayor = None
+    cod_my= ""
     #Banderas
     flag_destinatario = flag_mon = False
     for linea in archivo_leido:
@@ -105,14 +119,23 @@ def main():
 
         moneda_extraida, flag_mon = extraer_moneda(moneda)
         flag_destinatario = validar_cod_identificacion(cod_identificacion)
+        #TODO: calculo de monto final
+        monto_final = 1
         # Validaciones
         if flag_mon:
             # TODO: R8,metodo para contar monedas, se supone que en este punto las monedas estan verificadas y cumplen las validaciones
             cant_GBP = contar_monedas(moneda, cant_GBP, "GBP")
             # TODO: R9, idem al anterior
             cant_JPY = contar_monedas(moneda, cant_JPY, "JPY")
+
         else:
             pass
+
+        # TODO: r10 r11 12
+        if flag_mon and flag_destinatario:
+            cod_my,dif_hist = calc_cod_may(monto_nominal,monto_final,ord_pago,dif_hist)
+            mont_nom_my = monto_nominal
+            mont_fin_my = monto_final
 
         moneda, moneda_incorrecta = extraer_moneda(ord_pago)
 
@@ -123,8 +146,8 @@ def main():
         print(moneda, "..", moneda_incorrecta)
         moneda_extraida = ""
 
-    archivo_leido.close()
-
+    archivo_leido.close() #TODO: puede generar error 
+    mostrar_resultados(cant_GBP, cant_JPY, cod_my, mont_nom_my, mont_fin_my)
 if __name__ == "__main__":
     main()
 
