@@ -1,40 +1,88 @@
 def extraer_moneda(cod_pago):
     monedas_validas=("USD", "EUR", "ARS", "GBP", "JPY")
-    monedas_encontradas= 0
-    flag_moneda=False
-    cont=0
-    moneda_incorrecta=False
-    moneda_anterior= moneda=''
+    cantidad_total=0
+    moneda_encontrada=''
     for mon in monedas_validas:
         if mon in cod_pago:
-            monedas_encontradas += 1
-            if monedas_encontradas > 1 and moneda_anterior != moneda : # TODO:la condc. "dice hay dos o más diferentes", no lo hago and porque tengo que tener 2 o + y ser diferentes por eso la variable mondena anterior.
-                moneda_incorrecta = True
-            else:
-                moneda = mon
-        else:
-            moneda_incorrecta = True
+            cantidad_total += 1
+            if moneda_encontrada == '':
+                moneda_encontrada = mon
+            elif moneda_encontrada != mon:
+                return '', True
 
-        moneda_anterior = mon
-
-    return moneda,moneda_incorrecta
-
+    if cantidad_total == 0:
+        return '', True  # No se encontró ninguna moneda válida
+    else:
+        return moneda_encontrada, False  # Una o más veces la misma moneda
 
 
-def calculo_comisiones(moneda,algoritmo,monto_nominal):
-    destinatario, cod_identificacion, ord_pago, monto, cod_comision, cod_cal_impositivo=capturar_datos();
+def calculo_comisiones(moneda,algoritmo_comision,monto_nominal):
+    #destinatario, cod_identificacion, ord_pago, monto, cod_comision, cod_cal_impositivo=capturar_datos();
     comision=0
-    if algoritmo==1 and moneda=="ARS":
-        comision=monto_nominal*0.09
+    monto_base=0
+    if algoritmo_comision==1 and moneda=="ARS":
+        comision=(monto_nominal*9)//100
         monto_base=monto_nominal-comision
-    elif algoritmo==2 and moneda=="USD":
+    elif algoritmo_comision==2 and moneda=="USD":
         if monto_nominal<50000:
+            monto_base=monto_nominal
+        elif 50000<=monto_nominal<80000:
+            comision = (monto_nominal*5)//100
+            monto_base = monto_nominal - comision
+        elif monto_nominal>=80000:
+            comision = (monto_nominal * 7.8) // 100
+            monto_base = monto_nominal - comision
+    elif algoritmo_comision==3 and (moneda=="EUR" or moneda=="GBP"):
+        monto_fijo = 100
+        if monto_nominal>=25000:
+            comision = (monto_nominal * 6) // 100
+            monto_base = monto_nominal - (monto_fijo+comision)
+        else:
+            monto_base=monto_nominal-monto_fijo
+    elif algoritmo_comision==4 and moneda=="JPY":
+        if monto_nominal <= 100000:
+            comision = 500
+            monto_base = monto_nominal - comision
+        else:
+            comision=1000
+            monto_base = monto_nominal - comision
+    elif algoritmo_comision==5 and moneda=="ARS":
+        if monto_nominal<500000:
             comision=0
-        elif
-        comision=monto_nominal*0.09
-        monto_base=monto_nominal-comision
+            monto_base=monto_nominal
+        elif monto_nominal>=500000:
+            comision = (monto_nominal * 7) // 100
+            if comision>500000:
+                comision = 50000
+                monto_base = monto_nominal-comision
+            else:
+                monto_base = monto_nominal - comision
 
 
+    return monto_base
+
+def calculo_impositivo(monto_base,algoritmo_impositivo):
+    impuesto=0
+    monto_final=0
+    if algoritmo_impositivo==1:
+        if monto_base<=300000:
+            monto_final=monto_base
+        elif monto_base>300000:
+            excedente=monto_base-300000
+            impuesto= (excedente * 25) // 100
+            monto_final=monto_base-impuesto
+    if algoritmo_impositivo==2:
+        if monto_base<50000:
+            impuesto=50
+            monto_final=monto_base-impuesto
+        elif monto_base>=50000:
+            impuesto = 100
+            monto_final = monto_base - impuesto
+    if algoritmo_impositivo==3:
+        impuesto= (monto_base * 3) // 100
+        monto_final = monto_base - impuesto
+
+    return monto_final
 
 def leer_archivo(nombre):
     archivo = open(nombre)
@@ -43,7 +91,7 @@ def leer_archivo(nombre):
 
 
 def capturar_datos(linea):
-    destinatario = cod_identificacion = ord_pago = monto = cod_comision= cod_cal_impositivo =  ""
+    destinatario = cod_identificacion = ord_pago = monto = cod_comision= cod_cal_impositivo = ""
     destinatario = linea[0:20]
     cod_identificacion = linea[20:30]
     ord_pago = linea[30: 40] #Moneda
@@ -68,7 +116,7 @@ def validar_cod_identificacion(destinatario):
     for c in destinatario:
         if "A" <= c <= "Z" or c in "0123456789" or c == " ":
             estado = True
-        elif estado  and c in "-_" or c == " ":
+        elif c in "-_" or c == " ":
             estado = True
         else:
             estado = False
@@ -76,16 +124,16 @@ def validar_cod_identificacion(destinatario):
 
     return estado
 
-def mostrar_resultados(cant_GBP,cant_JPY):
-#     print(' (r1) - Cantidad de ordenes invalidas - moneda no autorizada:', cant_minvalida)
-#     print(' (r2) - Cantidad de ordenes invalidas - beneficiario mal identificado:', cant_binvalido)
-#     print(' (r3) - Cantidad de operaciones validas:', cant_oper_validas)
-#     print(' (r4) - Suma de montos finales de operaciones validas:', suma_mf_validas)
-#     print(' (r5) - Cantidad de ordenes para moneda ARS:', cant_ARS)
-#     print(' (r6) - Cantidad de ordenes para moneda USD:', cant_USD)
-#     print(' (r7) - Cantidad de ordenes para moneda EUR:', cant_EUR)
-    print(' (r8) - Cantidad de ordenes para moneda GBP:', cant_GBP)
-    print(' (r9) - Cantidad de ordenes para moneda JPN:', cant_JPY)
+def mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY):
+     print(' (r1) - Cantidad de ordenes invalidas - moneda no autorizada:', cant_inv_por_moneda)
+     print(' (r2) - Cantidad de ordenes invalidas - beneficiario mal identificado:', cant_inv_por_destinatario)
+     print(' (r3) - Cantidad de operaciones validas:', cant_operaciones_validas)
+     print(' (r4) - Suma de montos finales de operaciones validas:', suma_mf_validas)
+     print(' (r5) - Cantidad de ordenes para moneda ARS:', cant_ARS)
+     print(' (r6) - Cantidad de ordenes para moneda USD:', cant_USD)
+     print(' (r7) - Cantidad de ordenes para moneda EUR:', cant_EUR)
+     print(' (r8) - Cantidad de ordenes para moneda GBP:', cant_GBP)
+     print(' (r9) - Cantidad de ordenes para moneda JPN:', cant_JPY)
 #     print('(r10) - Codigo de la orden de pago con mayor diferencia  nominal - final:', cod_my)
 #     print('(r11) - Monto nominal de esa misma orden:', mont_nom_my)
 #     print('(r12) - Monto final de esa misma orden:', mont_fin_my)
@@ -103,36 +151,53 @@ def contar_monedas(moneda, c_monedas, param):
 def main():
     nombre = "ordenes25.txt"
     archivo_leido = leer_archivo(nombre)
-    #Contadores
-    cant_JPY = cant_GBP = 0
     #Variables
     destinatario= cod_identificacion= ord_pago= monto= cod_comision= cod_cal_impositivo = ""
 
-    #Banderas
-    flag_destinatario = flag_mon = False
+    # -----------------R1,R2------------------:
+    cant_inv_por_destinatario,cant_inv_por_moneda=0,0
+    # -----------------R3------------------:
+    cant_operaciones_validas=0
+    # -----------------R4------------------:
+    suma_mf_validas=0
+    # -----------------R5,R6,R7,R8,R9------------------:
+    cant_JPY = cant_GBP = cant_ARS = cant_USD = cant_EUR = 0
+
+
     for linea in archivo_leido:
         destinatario, cod_identificacion, ord_pago, monto_nominal, cod_comision, cod_cal_impositivo = capturar_datos(linea)
+        monto_nominal = int(monto_nominal)
+        cod_comision = int(cod_comision)
+        cod_cal_impositivo = int(cod_cal_impositivo)
 
-        moneda_extraida, flag_mon = extraer_moneda(moneda)
+        #-----------------R1,R2------------------:
+        moneda, flag_moneda = extraer_moneda(ord_pago)
         flag_destinatario = validar_cod_identificacion(cod_identificacion)
-        # Validaciones
-        if flag_mon:
-            # TODO: R8,metodo para contar monedas, se supone que en este punto las monedas estan verificadas y cumplen las validaciones
-            cant_GBP = contar_monedas(moneda, cant_GBP, "GBP")
-            # TODO: R9, idem al anterior
-            cant_JPY = contar_monedas(moneda, cant_JPY, "JPY")
-        else:
-            pass
+        if flag_moneda:
+            cant_inv_por_moneda += 1
+        elif not flag_destinatario:
+            cant_inv_por_destinatario += 1
 
-        moneda, moneda_incorrecta = extraer_moneda(ord_pago)
+        elif flag_moneda and not flag_destinatario: #Operación inválida por ambos motivos
+            cant_inv_por_moneda += 1
 
-        # Reinicio
-        flag_destinatario = flag_mon = False
+        # -----------------R3,R4------------------:
+        if not flag_moneda and flag_destinatario:
+            cant_operaciones_validas+=1
+            monto_base=calculo_comisiones(moneda,cod_comision,monto_nominal)
+            monto_final=calculo_impositivo(monto_base,cod_cal_impositivo)
+            suma_mf_validas+=monto_final
 
-        # calculo_comisiones(moneda,cod_comision, monto_nominal)
-        print(moneda, "..", moneda_incorrecta)
-        moneda_extraida = ""
+        # -----------------R5,R6,R7,R8,R9------------------:
+        cant_ARS = contar_monedas(moneda, cant_ARS, "ARS")
+        cant_USD = contar_monedas(moneda, cant_USD, "USD")
+        cant_EUR = contar_monedas(moneda, cant_EUR, "EUR")
+        cant_GBP = contar_monedas(moneda, cant_GBP, "GBP")
+        cant_JPY = contar_monedas(moneda, cant_JPY, "JPY")
 
+
+
+    mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY)
     archivo_leido.close()
 
 if __name__ == "__main__":
