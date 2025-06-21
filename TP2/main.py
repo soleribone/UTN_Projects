@@ -189,11 +189,12 @@ def main():
             suma_mf_validas+=monto_final
 
         # -----------------R5,R6,R7,R8,R9------------------:
-        cant_ARS = contar_monedas(moneda, cant_ARS, "ARS")
-        cant_USD = contar_monedas(moneda, cant_USD, "USD")
-        cant_EUR = contar_monedas(moneda, cant_EUR, "EUR")
-        cant_GBP = contar_monedas(moneda, cant_GBP, "GBP")
-        cant_JPY = contar_monedas(moneda, cant_JPY, "JPY")
+        if not flag_moneda:
+            cant_ARS = contar_monedas(moneda, cant_ARS, "ARS")
+            cant_USD = contar_monedas(moneda, cant_USD, "USD")
+            cant_EUR = contar_monedas(moneda, cant_EUR, "EUR")
+            cant_GBP = contar_monedas(moneda, cant_GBP, "GBP")
+            cant_JPY = contar_monedas(moneda, cant_JPY, "JPY")
 
 
 
