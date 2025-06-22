@@ -20,10 +20,10 @@ def calculo_comisiones(moneda,algoritmo_comision,monto_nominal):
     #destinatario, cod_identificacion, ord_pago, monto, cod_comision, cod_cal_impositivo=capturar_datos();
     comision=0
     monto_base=0
-    if algoritmo_comision==1 and moneda=="ARS":
+    if algoritmo_comision==1:
         comision=(monto_nominal*9)//100
         monto_base=monto_nominal-comision
-    elif algoritmo_comision==2 and moneda=="USD":
+    elif algoritmo_comision==2:
         if monto_nominal<50000:
             monto_base=monto_nominal
         elif 50000<=monto_nominal<80000:
@@ -32,7 +32,7 @@ def calculo_comisiones(moneda,algoritmo_comision,monto_nominal):
         elif monto_nominal>=80000:
             comision = (monto_nominal * 7.8) // 100
             monto_base = monto_nominal - comision
-    elif algoritmo_comision==3 and (moneda=="EUR" or moneda=="GBP"):
+    elif algoritmo_comision==3:
         monto_fijo = 100
         if monto_nominal>=25000:
             comision = (monto_nominal * 6) // 100
@@ -46,7 +46,7 @@ def calculo_comisiones(moneda,algoritmo_comision,monto_nominal):
         else:
             comision=1000
             monto_base = monto_nominal - comision
-    elif algoritmo_comision==5 and moneda=="ARS":
+    elif algoritmo_comision==5:
         if monto_nominal<500000:
             comision=0
             monto_base=monto_nominal
@@ -124,7 +124,17 @@ def validar_cod_identificacion(destinatario):
 
     return estado
 
-def mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY,ord_pago):
+def calcular_porcentaje(total, parte):
+    return (parte * 100) // total
+
+def calcular_promedio(total, cantidad):
+    resultado=0
+    if cantidad!=0:
+        resultado=total // cantidad
+
+    return resultado
+
+def mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY,cod_pago_mayor,monto_nominal_mayor, monto_final_mayor,nom_primer_benef,cant_nom_primer_benef,porcentaje,promedio):
      print(' (r1) - Cantidad de ordenes invalidas - moneda no autorizada:', cant_inv_por_moneda)
      print(' (r2) - Cantidad de ordenes invalidas - beneficiario mal identificado:', cant_inv_por_destinatario)
      print(' (r3) - Cantidad de operaciones validas:', cant_operaciones_validas)
@@ -134,13 +144,13 @@ def mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operac
      print(' (r7) - Cantidad de ordenes para moneda EUR:', cant_EUR)
      print(' (r8) - Cantidad de ordenes para moneda GBP:', cant_GBP)
      print(' (r9) - Cantidad de ordenes para moneda JPN:', cant_JPY)
-     print('(r10) - Codigo de la orden de pago con mayor diferencia  nominal - final:', ord_pago)
-#     print('(r11) - Monto nominal de esa misma orden:', mont_nom_my)
-#     print('(r12) - Monto final de esa misma orden:', mont_fin_my)
-#     print('(r13) - Nombre del primer beneficiario del archivo:', nom_primer_benef)
-#     print('(r14) - Cantidad de veces que apareció ese mismo nombre:', cant_nom_primer_benef)
-#     print('(r15) - Porcentaje de operaciones inválidas sobre el total:', porcentaje)
-#     print('(r16) - Monto final promedio de las ordenes validas en moneda ARS:', promedio)
+     print('(r10) - Codigo de la orden de pago con mayor diferencia  nominal - final:', cod_pago_mayor)
+     print('(r11) - Monto nominal de esa misma orden:', monto_nominal_mayor)
+     print('(r12) - Monto final de esa misma orden:', monto_final_mayor)
+     print('(r13) - Nombre del primer beneficiario del archivo:', nom_primer_benef)
+     print('(r14) - Cantidad de veces que apareció ese mismo nombre:', cant_nom_primer_benef)
+     print('(r15) - Porcentaje de operaciones inválidas sobre el total:', porcentaje)
+     print('(r16) - Monto final promedio de las ordenes validas en moneda ARS:', promedio)
 
 
 def contar_monedas(moneda, c_monedas, param):
@@ -162,10 +172,17 @@ def main():
     suma_mf_validas=0
     # -----------------R5,R6,R7,R8,R9------------------:
     cant_JPY = cant_GBP = cant_ARS = cant_USD = cant_EUR = 0
-    #------------------R10
+
+    #------------------R10,R11,R12--------------------:
     mayor_diferencia = 0
     cod_pago_mayor = ''
 
+    #
+    # -----------------R13,R14,R15,R16------------------:
+    nom_primer_benef = None
+    cant_nom_primer_benef = 0
+    porcentaje = 0
+    cant_operaciones_validas_R16, monto_base_R16, monto_final_R16, suma_mf_validas_R16 = 0, 0, 0, 0
 
     for linea in archivo_leido:
         destinatario, cod_identificacion, ord_pago, monto_nominal, cod_comision, cod_cal_impositivo = capturar_datos(linea)
@@ -199,26 +216,48 @@ def main():
             cant_GBP = contar_monedas(moneda, cant_GBP, "GBP")
             cant_JPY = contar_monedas(moneda, cant_JPY, "JPY")
 
-        #-------------R10---
+        #-------------R10,R11,R12----------
         monto_base_r10=calculo_comisiones(moneda,cod_comision,monto_nominal)
         monto_final_r10 =calculo_impositivo(monto_base_r10, cod_cal_impositivo)
 
-        diferencia = monto_base_r10-monto_final_r10
-
+        diferencia = monto_nominal-monto_final_r10
         if diferencia > mayor_diferencia:
             mayor_diferencia = diferencia
             cod_pago_mayor = ord_pago
-            monto_nominal_mayor=monto_nominal
-            monto_final_mayor=monto_final_r10
+            monto_nominal_mayor = monto_nominal
+            monto_final_mayor = monto_final_r10
         else:
-            continue
+            pass
 
+        #  -----------------R13,R14------------------:
 
-        print("Mayor_diferencia:",mayor_diferencia," Orden pago:")
+        if nom_primer_benef is None:
+            nom_primer_benef = destinatario
+            cant_nom_primer_benef += 1
+        elif nom_primer_benef == destinatario:
+            cant_nom_primer_benef += 1
 
+        #  -----------------R15-----------------:
 
+        cant_total_operaciones = cant_operaciones_validas + cant_inv_por_moneda + cant_inv_por_destinatario
+        cant_total_operaciones_invalidas = cant_inv_por_moneda + cant_inv_por_destinatario
 
-    mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY,cod_pago_mayor)
+        porcentaje = calcular_porcentaje(cant_total_operaciones, cant_total_operaciones_invalidas)
+
+        #  -----------------R16-----------------:
+
+        if not flag_moneda:
+            if moneda == "ARS" and flag_destinatario:
+                cant_operaciones_validas_R16 += 1
+                monto_base_R16 = calculo_comisiones(moneda, cod_comision, monto_nominal)
+                monto_final_R16 = calculo_impositivo(monto_base_R16, cod_cal_impositivo)
+                suma_mf_validas_R16 += monto_final_R16
+
+        promedio = calcular_promedio(suma_mf_validas_R16, cant_operaciones_validas_R16)
+
+    #  --------------------------------------:
+
+    mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY,cod_pago_mayor,monto_nominal_mayor, monto_final_mayor,nom_primer_benef,cant_nom_primer_benef,porcentaje,promedio)
     archivo_leido.close()
 
 if __name__ == "__main__":
