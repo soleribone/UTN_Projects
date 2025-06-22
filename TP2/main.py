@@ -215,6 +215,13 @@ def main():
         elif nom_primer_benef == destinatario:
             cant_nom_primer_benef += 1
 
+        #  -----------------R15-----------------:
+
+        cant_total_operaciones = cant_operaciones_validas + cant_inv_por_moneda + cant_inv_por_destinatario
+        cant_total_operaciones_invalidas = cant_inv_por_moneda + cant_inv_por_destinatario
+
+        porcentaje = calcular_porcentaje(cant_total_operaciones, cant_total_operaciones_invalidas)
+
         #  -----------------R16-----------------:
 
         if not flag_moneda:
@@ -226,14 +233,7 @@ def main():
 
     promedio = calcular_promedio(suma_mf_validas_R16, cant_operaciones_validas_R16)
 
-        #  -----------------R15-----------------:
-
-    cant_total_operaciones = cant_operaciones_validas + cant_inv_por_moneda + cant_inv_por_destinatario
-    cant_total_operaciones_invalidas = cant_inv_por_moneda + cant_inv_por_destinatario
-
-    porcentaje = calcular_porcentaje(cant_total_operaciones, cant_total_operaciones_invalidas)
-
-        #  --------------------------------------:
+    #  --------------------------------------:
 
     mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY,nom_primer_benef,cant_nom_primer_benef,porcentaje,promedio)
     archivo_leido.close()
