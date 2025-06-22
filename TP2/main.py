@@ -124,7 +124,7 @@ def validar_cod_identificacion(destinatario):
 
     return estado
 
-def mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY):
+def mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY,ord_pago):
      print(' (r1) - Cantidad de ordenes invalidas - moneda no autorizada:', cant_inv_por_moneda)
      print(' (r2) - Cantidad de ordenes invalidas - beneficiario mal identificado:', cant_inv_por_destinatario)
      print(' (r3) - Cantidad de operaciones validas:', cant_operaciones_validas)
@@ -134,7 +134,7 @@ def mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operac
      print(' (r7) - Cantidad de ordenes para moneda EUR:', cant_EUR)
      print(' (r8) - Cantidad de ordenes para moneda GBP:', cant_GBP)
      print(' (r9) - Cantidad de ordenes para moneda JPN:', cant_JPY)
-#     print('(r10) - Codigo de la orden de pago con mayor diferencia  nominal - final:', cod_my)
+     print('(r10) - Codigo de la orden de pago con mayor diferencia  nominal - final:', ord_pago)
 #     print('(r11) - Monto nominal de esa misma orden:', mont_nom_my)
 #     print('(r12) - Monto final de esa misma orden:', mont_fin_my)
 #     print('(r13) - Nombre del primer beneficiario del archivo:', nom_primer_benef)
@@ -162,6 +162,9 @@ def main():
     suma_mf_validas=0
     # -----------------R5,R6,R7,R8,R9------------------:
     cant_JPY = cant_GBP = cant_ARS = cant_USD = cant_EUR = 0
+    #------------------R10
+    mayor_diferencia = 0
+    cod_pago_mayor = ''
 
 
     for linea in archivo_leido:
@@ -196,9 +199,26 @@ def main():
             cant_GBP = contar_monedas(moneda, cant_GBP, "GBP")
             cant_JPY = contar_monedas(moneda, cant_JPY, "JPY")
 
+        #-------------R10---
+        monto_base_r10=calculo_comisiones(moneda,cod_comision,monto_nominal)
+        monto_final_r10 =calculo_impositivo(monto_base_r10, cod_cal_impositivo)
+
+        diferencia = monto_base_r10-monto_final_r10
+
+        if diferencia > mayor_diferencia:
+            mayor_diferencia = diferencia
+            cod_pago_mayor = ord_pago
+            monto_nominal_mayor=monto_nominal
+            monto_final_mayor=monto_final_r10
+        else:
+            continue
 
 
-    mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY)
+        print("Mayor_diferencia:",mayor_diferencia," Orden pago:")
+
+
+
+    mostrar_resultados(cant_inv_por_moneda,cant_inv_por_destinatario,cant_operaciones_validas,suma_mf_validas,cant_ARS,cant_USD,cant_EUR,cant_GBP,cant_JPY,cod_pago_mayor)
     archivo_leido.close()
 
 if __name__ == "__main__":
