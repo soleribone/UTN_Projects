@@ -58,6 +58,19 @@ def calculo_comisiones(moneda,algoritmo_comision,monto_nominal):
             else:
                 monto_base = monto_nominal - comision
 
+    elif algoritmo_comision == 7 and moneda == "JPY":
+        if monto_nominal <= 75000:
+            comision = 3000
+        elif monto_nominal > 75000:
+            comision = (monto_nominal - 75000) * 5 // 100
+
+        if comision > 10000:
+            comision = 10000
+
+        monto_base = monto_nominal - comision
+
+    else:
+        monto_base = monto_nominal
 
     return monto_base
 
@@ -71,16 +84,19 @@ def calculo_impositivo(monto_base,algoritmo_impositivo):
             excedente=monto_base-300000
             impuesto= (excedente * 25) // 100
             monto_final=monto_base-impuesto
-    if algoritmo_impositivo==2:
+    elif algoritmo_impositivo==2:
         if monto_base<50000:
             impuesto=50
             monto_final=monto_base-impuesto
         elif monto_base>=50000:
             impuesto = 100
             monto_final = monto_base - impuesto
-    if algoritmo_impositivo==3:
+    elif algoritmo_impositivo==3:
         impuesto= (monto_base * 3) // 100
         monto_final = monto_base - impuesto
+
+    else:
+        monto_final = monto_base
 
     return monto_final
 
@@ -159,7 +175,7 @@ def contar_monedas(moneda, c_monedas, param):
     return c_monedas
 
 def main():
-    nombre = "ordenes25.txt"
+    nombre = "ordenes100.txt"
     archivo_leido = leer_archivo(nombre)
     #Variables
     destinatario= cod_identificacion= ord_pago= monto= cod_comision= cod_cal_impositivo = ""
@@ -226,8 +242,7 @@ def main():
             cod_pago_mayor = ord_pago
             monto_nominal_mayor = monto_nominal
             monto_final_mayor = monto_final_r10
-        else:
-            pass
+
 
         #  -----------------R13,R14------------------:
 
